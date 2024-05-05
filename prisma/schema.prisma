@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email    String @unique
+  password String
+  name     String
+  lastname String
+
+  imageUrl      String?
+  resetPassword String?
+
+  Recipe       Recipe[]
+  SavedByUsers SavedByUsers[]
+
+  @@map("user")
+}
+
+model Recipe {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title  String
+  time   String
+  number Int
+
+  imageUrl   String?
+  fromHellof Boolean @default(false)
+
+  typeId Int
+  type   Type @relation(fields: [typeId], references: [id])
+
+  regimeId Int
+  regime   Regime @relation(fields: [regimeId], references: [id])
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  Step         Step[]
+  Ingredient   Ingredient[]
+  SavedByUsers SavedByUsers[]
+
+  @@map("recipe")
+}
+
+model SavedByUsers {
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  recipeId Int
+  user     User   @relation(fields: [userId], references: [id])
+  userId   Int
+
+  @@id([recipeId, userId])
+  @@map("recipe_user")
+}
+
+model Step {
+  id          Int    @id @default(autoincrement())
+  description String
+  stepIndex   Int
+
+  recipeId Int
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@map("step")
+}
+
+model Ingredient {
+  id       Int    @id @default(autoincrement())
+  label    String
+  quantity Float
+
+  recipeId Int
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  unitId Int
+  unit   Unit @relation(fields: [unitId], references: [id])
+
+  @@map("ingredient")
+}
+
+model Unit {
+  id    Int    @id @default(autoincrement())
+  label String
+
+  Ingredient Ingredient[]
+
+  @@map("unit")
+}
+
+model Type {
+  id    Int    @id @default(autoincrement())
+  label String
+
+  Recipe Recipe[]
+
+  @@map("type")
+}
+
+model Regime {
+  id    Int    @id @default(autoincrement())
+  label String
+
+  Recipe Recipe[]
+
+  @@map("regime")
+}
+
+model IngredientType {
+  id    Int    @id @default(autoincrement())
+  label String
+
+  IngredientData IngredientData[]
+
+  @@map("ingredient_type")
+}
+
+model IngredientData {
+  id        Int    @id @default(autoincrement())
+  frequency Int?
+  name      String
+
+  ingredientTypeId Int
+  ingredientType   IngredientType @relation(fields: [ingredientTypeId], references: [id])
+
+  @@map("ingredient_data")
+}
+
+model ExternalToken {
+  id    Int    @id @default(autoincrement())
+  value String
+
+  @@map("external_token")
+}
