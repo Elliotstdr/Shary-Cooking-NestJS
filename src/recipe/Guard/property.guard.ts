@@ -19,11 +19,13 @@ export class RecipePropertyGuard implements CanActivate {
     });
 
     if (!recipe) {
-      throw new NotFoundException('No recipe found for this id');
+      throw new NotFoundException('Aucune recette trouvée pour cet id');
     }
 
     if (recipe.userId !== req.user.id) {
-      throw new UnauthorizedException('You are not the owner of this resource');
+      throw new UnauthorizedException(
+        "Vous n'êtes pas le propriétaire de cette ressource",
+      );
     }
     return true;
   }

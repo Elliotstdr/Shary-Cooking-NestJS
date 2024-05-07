@@ -74,7 +74,7 @@ export class AuthService {
         secret: this.config.get('REFRESH_TOKEN_SECRET'),
       });
 
-      const newAccessToken = await this.signToken(user.id, user.email);
+      const newAccessToken = await this.signToken(user.sub, user.email);
 
       return { access_token: newAccessToken };
     } catch (error) {
@@ -99,7 +99,7 @@ export class AuthService {
     };
 
     const token = this.jwt.sign(payload, {
-      expiresIn: '2h',
+      expiresIn: '15m',
       secret: this.config.get('JWT_SECRET'),
     });
 

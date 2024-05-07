@@ -33,12 +33,12 @@ export class CreateRecipeDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => DtoStep)
-  steps: DtoStep[];
+  Steps: DtoStep[];
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => DtoIngredient)
-  ingredients: DtoIngredient[];
+  Ingredients: DtoIngredient[];
 
   @IsString()
   @IsOptional()

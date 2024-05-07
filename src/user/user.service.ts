@@ -11,6 +11,7 @@ import {
 import * as argon from 'argon2';
 import { MailService } from 'src/mail/mail.service';
 import { AuthService } from 'src/auth/auth.service';
+import { USER_SELECT } from './enum';
 
 @Injectable()
 export class UserService {
@@ -21,20 +22,15 @@ export class UserService {
   ) {}
 
   async getMe(user: User) {
-    delete user.password;
-    delete user.resetPassword;
     return user;
   }
 
   async editUser(userId: number, dto: EditUserDto) {
-    const user = await this.prisma.user.update({
+    return await this.prisma.user.update({
       where: { id: userId },
       data: { ...dto },
+      select: USER_SELECT,
     });
-
-    delete user.password;
-
-    return user;
   }
 
   async editPassword(userId: number, dto: EditPasswordDto) {
@@ -42,7 +38,7 @@ export class UserService {
 
     const pwMatches = await argon.verify(user.password, dto.password);
     if (!pwMatches)
-      throw new ForbiddenException('The old password is not correct');
+      throw new ForbiddenException("L'ancien mot de passe est invalide");
 
     const hash = await argon.hash(dto.password);
     await this.prisma.user.update({
@@ -58,17 +54,18 @@ export class UserService {
       where: { email: dto.email },
     });
 
-    if (!user) return 'Utilisateur non trouvé';
+    if (!user) return;
 
     const key = (Math.random() + 1).toString(36).substring(2);
+    const hashedKey = await argon.hash(key);
 
     await this.prisma.user.update({
       where: { email: dto.email },
-      data: { resetPassword: key },
+      data: { resetPassword: hashedKey },
     });
 
     this.mailer.sendResetPasswordEmail(key);
-    return 'Success';
+    return;
   }
 
   async resetPassword(dto: ResetPasswordDto) {
@@ -76,12 +73,12 @@ export class UserService {
       where: { email: dto.email },
     });
 
-    if (!user) return 'Utilisateur non trouvé';
+    if (!user) return;
 
     const pwMatches = await argon.verify(user.resetPassword, dto.resetKey);
 
     if (!pwMatches)
-      throw new ForbiddenException('The secret key is not correct');
+      throw new ForbiddenException("La clé secrète n'est pas valide");
 
     const newPassword = await argon.hash(dto.newPassword);
     const newUser = await this.prisma.user.update({
@@ -90,11 +87,12 @@ export class UserService {
         resetPassword: null,
         password: newPassword,
       },
+      select: USER_SELECT,
     });
 
     const newToken = await this.authService.signin({
       email: dto.email,
-      password: newPassword,
+      password: dto.newPassword,
     });
 
     return { user: newUser, token: newToken.access_token };
@@ -102,6 +100,6 @@ export class UserService {
 
   async sendReport(user: User, dto: SendReportDto) {
     this.mailer.sendReportEmail(user, dto);
-    return 'Success';
+    return;
   }
 }

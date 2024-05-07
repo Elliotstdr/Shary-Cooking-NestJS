@@ -4,6 +4,7 @@ import { CreateRecipeDto } from './dto';
 import { RecipeUtilities } from './recipe.utilities';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { RECIPE_INCLUDE } from './enum';
 
 @Injectable()
 export class RecipeService {
@@ -15,31 +16,30 @@ export class RecipeService {
   ) {}
 
   async getRecipes() {
-    return await this.prisma.recipe.findMany({
-      include: { Step: true, Ingredient: true, SavedByUsers: true },
+    return this.prisma.recipe.findMany({
+      include: RECIPE_INCLUDE,
+      orderBy: { id: 'asc' },
     });
   }
 
   async getRecipeById(recipeId: number) {
-    return this.recipeUtilities.getResponseRecipe(recipeId);
+    return this.prisma.recipe.findUnique({
+      where: { id: recipeId },
+      include: RECIPE_INCLUDE,
+    });
   }
 
   async createRecipe(userId: number, dto: CreateRecipeDto) {
-    let createdRecipe;
-    await this.prisma.$transaction(async () => {
-      const reqSteps = [...dto.steps];
-      const reqIngredients = [...dto.ingredients];
+    return await this.prisma.$transaction(async () => {
+      const reqSteps = [...dto.Steps];
+      const reqIngredients = [...dto.Ingredients];
 
-      delete dto.steps;
-      delete dto.ingredients;
+      delete dto.Steps;
+      delete dto.Ingredients;
 
-      createdRecipe = await this.prisma.recipe.create({
+      const createdRecipe = await this.prisma.recipe.create({
         data: { ...dto, userId },
-        include: {
-          Step: true,
-          Ingredient: true,
-          SavedByUsers: true,
-        },
+        include: RECIPE_INCLUDE,
       });
 
       const createdSteps = await this.recipeUtilities.createSteps(
@@ -52,11 +52,11 @@ export class RecipeService {
         createdRecipe.id,
       );
 
-      createdRecipe.Step = createdSteps;
-      createdRecipe.Ingredient = createdIngredients;
-    });
+      createdRecipe.steps = createdSteps;
+      createdRecipe.ingredients = createdIngredients;
 
-    return createdRecipe;
+      return createdRecipe;
+    });
   }
 
   async editRecipeById(recipeId: number, dto: CreateRecipeDto) {
@@ -67,20 +67,16 @@ export class RecipeService {
       where: { recipeId: recipeId },
     });
 
-    await this.recipeUtilities.createSteps(dto.steps, recipeId);
-    await this.recipeUtilities.createIngredients(dto.ingredients, recipeId);
+    await this.recipeUtilities.createSteps(dto.Steps, recipeId);
+    await this.recipeUtilities.createIngredients(dto.Ingredients, recipeId);
 
-    delete dto.steps;
-    delete dto.ingredients;
+    delete dto.Steps;
+    delete dto.Ingredients;
 
     return await this.prisma.recipe.update({
       where: { id: recipeId },
       data: dto,
-      include: {
-        Step: true,
-        Ingredient: true,
-        SavedByUsers: true,
-      },
+      include: RECIPE_INCLUDE,
     });
   }
 
@@ -134,12 +130,12 @@ export class RecipeService {
 
   async getTopRecipes() {
     const recipes = await this.prisma.recipe.findMany({
-      include: { SavedByUsers: true },
+      include: RECIPE_INCLUDE,
     });
 
     return recipes
-      .filter((x) => x.SavedByUsers && x.SavedByUsers.length > 0)
-      .sort((a, b) => b.SavedByUsers.length - a.SavedByUsers.length)
+      .filter((x) => x.savedByUsers && x.savedByUsers.length > 0)
+      .sort((a, b) => b.savedByUsers.length - a.savedByUsers.length)
       .slice(0, 3);
   }
 
@@ -153,7 +149,10 @@ export class RecipeService {
       });
     } catch (error) {}
 
-    return this.recipeUtilities.getResponseRecipe(recipeId);
+    return this.prisma.recipe.findUnique({
+      where: { id: recipeId },
+      include: RECIPE_INCLUDE,
+    });
   }
 
   async unsaveRecipe(userId: number, recipeId: number) {
@@ -168,6 +167,9 @@ export class RecipeService {
       });
     } catch (error) {}
 
-    return this.recipeUtilities.getResponseRecipe(recipeId);
+    return this.prisma.recipe.findUnique({
+      where: { id: recipeId },
+      include: RECIPE_INCLUDE,
+    });
   }
 }

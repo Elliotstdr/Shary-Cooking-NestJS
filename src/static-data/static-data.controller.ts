@@ -7,16 +7,16 @@ export class StaticDataController {
 
   @Get()
   async getStaticData() {
-    const unit = await this.prisma.unit.findMany();
-    const type = await this.prisma.type.findMany();
-    const regime = await this.prisma.regime.findMany();
-    const ingredientType = await this.prisma.ingredientType.findMany();
+    const units = await this.prisma.unit.findMany();
+    const types = await this.prisma.type.findMany();
+    const regimes = await this.prisma.regime.findMany();
+    const ingTypes = await this.prisma.ingredientType.findMany();
 
     return {
-      unit,
-      type,
-      regime,
-      ingredientType,
+      units,
+      types,
+      regimes,
+      ingTypes,
     };
   }
 }

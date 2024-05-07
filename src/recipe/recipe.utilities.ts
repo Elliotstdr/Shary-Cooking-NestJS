@@ -7,36 +7,35 @@ export class RecipeUtilities {
   constructor(private prisma: PrismaService) {}
 
   async createSteps(reqSteps: DtoStep[], recipeId: number) {
-    return await Promise.all(
-      reqSteps.map((step) =>
-        this.prisma.step.create({
-          data: {
-            ...step,
-            recipeId: recipeId,
-          },
-        }),
-      ),
-    );
+    const newSteps = [];
+
+    for (const x of reqSteps) {
+      const item = await this.prisma.step.create({
+        data: {
+          ...x,
+          recipeId: recipeId,
+        },
+      });
+      newSteps.push(item);
+    }
+
+    return newSteps;
   }
 
   async createIngredients(reqIngredients: DtoIngredient[], recipeId: number) {
-    return await Promise.all(
-      reqIngredients.map((ingredient) =>
-        this.prisma.ingredient.create({
-          data: {
-            ...ingredient,
-            recipeId: recipeId,
-          },
-          include: { unit: true },
-        }),
-      ),
-    );
-  }
+    const newIngredients = [];
 
-  async getResponseRecipe(recipeId: number) {
-    return this.prisma.recipe.findUnique({
-      where: { id: recipeId },
-      include: { Step: true, Ingredient: true, SavedByUsers: true },
-    });
+    for (const x of reqIngredients) {
+      const item = await this.prisma.ingredient.create({
+        data: {
+          ...x,
+          recipeId: recipeId,
+        },
+        include: { unit: true },
+      });
+      newIngredients.push(item);
+    }
+
+    return newIngredients;
   }
 }

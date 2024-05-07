@@ -8,9 +8,6 @@ export class IngredientDataController {
   @Get()
   async getIngredientData() {
     return await this.prisma.ingredientData.findMany({
-      include: {
-        ingredientType: true,
-      },
       orderBy: { name: 'asc' },
     });
   }

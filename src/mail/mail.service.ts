@@ -31,7 +31,7 @@ export class MailService {
 
   async sendResetPasswordEmail(key: string) {
     await this.transporter.sendMail({
-      subject: 'Reset password',
+      subject: 'Réinitialisation de mot de passe',
       html: this.loadTemplate('resetPassword.hbs', { key: key }),
     });
   }
