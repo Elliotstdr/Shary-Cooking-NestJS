@@ -9,13 +9,16 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { JwtGuard, NotGuestGuard } from 'src/auth/Guard';
 import { GetUser } from 'src/auth/decorator';
 import { CreateRecipeDto } from './dto';
 import { RecipeService } from './recipe.service';
 import { RecipePropertyGuard } from './Guard';
+import { FILE_INTERCEPTOR, PIPE_BUILDER } from 'src/enum';
 
 @UseGuards(JwtGuard)
 @Controller('recipes')
@@ -59,11 +62,19 @@ export class RecipeController {
   @UseGuards(NotGuestGuard)
   @UseGuards(RecipePropertyGuard)
   @Post(':id/deletePicture')
-  deleteRecipePicture(
-    @GetUser('id') userId: number,
+  deleteRecipePicture(@Param('id', ParseIntPipe) recipeId: number) {
+    return this.recipeService.deleteRecipePicture(recipeId);
+  }
+
+  @UseGuards(NotGuestGuard)
+  @UseGuards(RecipePropertyGuard)
+  @UseInterceptors(FILE_INTERCEPTOR)
+  @Post(':id/addPicture')
+  addRecipePicture(
     @Param('id', ParseIntPipe) recipeId: number,
+    @UploadedFile(PIPE_BUILDER) file: Express.Multer.File | undefined,
   ) {
-    return this.recipeService.deleteRecipePicture(userId, recipeId);
+    return this.recipeService.addRecipePicture(recipeId, file?.filename);
   }
 
   @Post('hellof')

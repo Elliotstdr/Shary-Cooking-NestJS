@@ -4,7 +4,9 @@ import { CreateRecipeDto } from './dto';
 import { RecipeUtilities } from './recipe.utilities';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { RECIPE_INCLUDE } from './enum';
+import { RECIPE_INCLUDE } from 'src/enum';
+import * as fs from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class RecipeService {
@@ -31,35 +33,33 @@ export class RecipeService {
 
   async createRecipe(userId: number, dto: CreateRecipeDto) {
     return await this.prisma.$transaction(async () => {
-      const reqSteps = [...dto.Steps];
-      const reqIngredients = [...dto.Ingredients];
+      const { steps, ingredients, ...body } = dto;
 
-      delete dto.Steps;
-      delete dto.Ingredients;
-
-      const createdRecipe = await this.prisma.recipe.create({
-        data: { ...dto, userId },
+      const recipe = await this.prisma.recipe.create({
+        data: { ...body, userId },
         include: RECIPE_INCLUDE,
       });
 
       const createdSteps = await this.recipeUtilities.createSteps(
-        reqSteps,
-        createdRecipe.id,
+        steps,
+        recipe.id,
       );
 
       const createdIngredients = await this.recipeUtilities.createIngredients(
-        reqIngredients,
-        createdRecipe.id,
+        ingredients,
+        recipe.id,
       );
 
-      createdRecipe.steps = createdSteps;
-      createdRecipe.ingredients = createdIngredients;
+      recipe.steps = createdSteps;
+      recipe.ingredients = createdIngredients;
 
-      return createdRecipe;
+      return recipe;
     });
   }
 
   async editRecipeById(recipeId: number, dto: CreateRecipeDto) {
+    const { steps, ingredients, ...body } = dto;
+
     await this.prisma.step.deleteMany({
       where: { recipeId: recipeId },
     });
@@ -67,15 +67,12 @@ export class RecipeService {
       where: { recipeId: recipeId },
     });
 
-    await this.recipeUtilities.createSteps(dto.Steps, recipeId);
-    await this.recipeUtilities.createIngredients(dto.Ingredients, recipeId);
-
-    delete dto.Steps;
-    delete dto.Ingredients;
+    await this.recipeUtilities.createSteps(steps, recipeId);
+    await this.recipeUtilities.createIngredients(ingredients, recipeId);
 
     return await this.prisma.recipe.update({
       where: { id: recipeId },
-      data: dto,
+      data: body,
       include: RECIPE_INCLUDE,
     });
   }
@@ -124,8 +121,41 @@ export class RecipeService {
     return response;
   }
 
-  async deleteRecipePicture(userId: number, recipeId: number) {
-    console.log(userId, recipeId);
+  async deleteRecipePicture(recipeId: number) {
+    const recipe = await this.prisma.recipe.findUnique({
+      where: { id: recipeId },
+    });
+
+    try {
+      const pathToFile = join(__dirname, '..', '..', recipe.imageUrl);
+      fs.unlinkSync(pathToFile);
+    } catch (error) {
+      console.log(error);
+    }
+
+    await this.prisma.recipe.update({
+      where: { id: recipeId },
+      data: { imageUrl: null },
+    });
+    return;
+  }
+
+  async addRecipePicture(recipeId: number, filename: string) {
+    const newImageUrl = `/public/${filename}`;
+    const recipe = await this.prisma.recipe.findUnique({
+      where: { id: recipeId },
+    });
+
+    if (recipe.imageUrl) await this.deleteRecipePicture(recipe.id);
+
+    await this.prisma.recipe.update({
+      where: { id: recipeId },
+      data: {
+        imageUrl: newImageUrl,
+      },
+    });
+
+    return newImageUrl;
   }
 
   async getTopRecipes() {

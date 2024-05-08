@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Post,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator';
 import { JwtGuard, NotGuestGuard } from 'src/auth/Guard';
@@ -10,6 +19,8 @@ import {
   ResetPasswordDto,
   SendReportDto,
 } from './dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FILE_INTERCEPTOR, PIPE_BUILDER } from 'src/enum';
 
 @Controller('users')
 export class UserController {
@@ -23,9 +34,14 @@ export class UserController {
 
   @UseGuards(NotGuestGuard)
   @UseGuards(JwtGuard)
+  @UseInterceptors(FILE_INTERCEPTOR)
   @Patch()
-  editUser(@GetUser('id') userId: number, @Body() dto: EditUserDto) {
-    return this.userService.editUser(userId, dto);
+  editUser(
+    @GetUser('id') userId: number,
+    @Body() dto: EditUserDto,
+    @UploadedFile(PIPE_BUILDER) file: Express.Multer.File | undefined,
+  ) {
+    return this.userService.editUser(userId, dto, file?.filename);
   }
 
   @UseGuards(NotGuestGuard)
@@ -46,8 +62,13 @@ export class UserController {
   }
 
   @UseGuards(JwtGuard)
+  @UseInterceptors(FileInterceptor('image'))
   @Post('sendReport')
-  sendReport(@GetUser() user: User, @Body() dto: SendReportDto) {
-    return this.userService.sendReport(user, dto);
+  sendReport(
+    @GetUser() user: User,
+    @Body() dto: SendReportDto,
+    @UploadedFile(PIPE_BUILDER) file: Express.Multer.File | undefined,
+  ) {
+    return this.userService.sendReport(user, dto, file);
   }
 }

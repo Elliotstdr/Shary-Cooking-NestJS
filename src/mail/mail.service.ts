@@ -36,7 +36,11 @@ export class MailService {
     });
   }
 
-  async sendReportEmail(user: User, dto: SendReportDto) {
+  async sendReportEmail(
+    user: User,
+    dto: SendReportDto,
+    file: Express.Multer.File | undefined,
+  ) {
     await this.transporter.sendMail({
       subject: 'report from shary-cooking',
       html: this.loadTemplate('sendReport.hbs', {
@@ -44,8 +48,10 @@ export class MailService {
         lastname: user.lastname,
         title: dto.title,
         message: dto.message,
-        image: dto.image,
       }),
+      attachments: file
+        ? [{ filename: file.originalname, content: file.buffer }]
+        : [],
     });
   }
 

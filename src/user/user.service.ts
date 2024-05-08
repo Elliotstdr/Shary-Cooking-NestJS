@@ -11,7 +11,7 @@ import {
 import * as argon from 'argon2';
 import { MailService } from 'src/mail/mail.service';
 import { AuthService } from 'src/auth/auth.service';
-import { USER_SELECT } from './enum';
+import { USER_SELECT } from 'src/enum';
 
 @Injectable()
 export class UserService {
@@ -25,10 +25,22 @@ export class UserService {
     return user;
   }
 
-  async editUser(userId: number, dto: EditUserDto) {
+  async editUser(
+    userId: number,
+    dto: EditUserDto,
+    filename: string | undefined,
+  ) {
+    const data = { ...dto };
+
+    if (filename) {
+      data.imageUrl = `/public/${filename}`;
+    } else {
+      delete data.imageUrl;
+    }
+
     return await this.prisma.user.update({
       where: { id: userId },
-      data: { ...dto },
+      data: data,
       select: USER_SELECT,
     });
   }
@@ -98,8 +110,12 @@ export class UserService {
     return { user: newUser, token: newToken.access_token };
   }
 
-  async sendReport(user: User, dto: SendReportDto) {
-    this.mailer.sendReportEmail(user, dto);
+  async sendReport(
+    user: User,
+    dto: SendReportDto,
+    file: Express.Multer.File | undefined,
+  ) {
+    this.mailer.sendReportEmail(user, dto, file);
     return;
   }
 }
