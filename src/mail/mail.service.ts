@@ -1,17 +1,22 @@
 import * as nodemailer from 'nodemailer';
-import { Injectable } from '@nestjs/common';
 import * as handlebars from 'handlebars';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as argon from 'argon2';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
-import { SendReportDto } from 'src/user/dto';
+import { MailResetDto, SendReportDto } from './dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class MailService {
   private transporter: nodemailer.Transporter;
 
-  constructor(config: ConfigService) {
+  constructor(
+    config: ConfigService,
+    private prisma: PrismaService,
+  ) {
     this.transporter = nodemailer.createTransport(
       {
         host: config.get('EMAIL_HOST'),
@@ -29,7 +34,21 @@ export class MailService {
     );
   }
 
-  async sendResetPasswordEmail(key: string) {
+  async sendResetPasswordEmail(dto: MailResetDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (!user) return;
+
+    const key = (Math.random() + 1).toString(36).substring(2);
+    const hashedKey = await argon.hash(key);
+
+    await this.prisma.user.update({
+      where: { email: dto.email },
+      data: { resetPassword: hashedKey },
+    });
+
     await this.transporter.sendMail({
       subject: 'Réinitialisation de mot de passe',
       html: this.loadTemplate('resetPassword.hbs', { key: key }),

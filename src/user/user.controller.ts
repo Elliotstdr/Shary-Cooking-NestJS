@@ -12,14 +12,7 @@ import { User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator';
 import { JwtGuard, NotGuestGuard } from 'src/auth/Guard';
 import { UserService } from './user.service';
-import {
-  EditPasswordDto,
-  EditUserDto,
-  MailResetDto,
-  ResetPasswordDto,
-  SendReportDto,
-} from './dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { EditPasswordDto, EditUserDto, ResetPasswordDto } from './dto';
 import { FILE_INTERCEPTOR, PIPE_BUILDER } from 'src/enum';
 
 @Controller('users')
@@ -51,24 +44,8 @@ export class UserController {
     return this.userService.editPassword(userId, dto);
   }
 
-  @Post('mailReset')
-  sendMailReset(@Body() dto: MailResetDto) {
-    return this.userService.sendMailReset(dto);
-  }
-
   @Post('resetPassword')
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.userService.resetPassword(dto);
-  }
-
-  @UseGuards(JwtGuard)
-  @UseInterceptors(FileInterceptor('image'))
-  @Post('sendReport')
-  sendReport(
-    @GetUser() user: User,
-    @Body() dto: SendReportDto,
-    @UploadedFile(PIPE_BUILDER) file: Express.Multer.File | undefined,
-  ) {
-    return this.userService.sendReport(user, dto, file);
   }
 }
