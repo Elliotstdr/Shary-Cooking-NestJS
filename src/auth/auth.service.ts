@@ -10,6 +10,9 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
+const TOKEN_EXPIRATION = '15m';
+const REFRESH_TOKEN_EXPIRATION = '30d';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -33,10 +36,11 @@ export class AuthService {
   }
 
   async signup(dto: SignUpDto) {
+    const { secretKey, ...body } = dto;
     try {
       const hashedSecretKey = await argon.verify(
         process.env.SECRET_KEY,
-        dto.secretKey,
+        secretKey,
       );
 
       if (!hashedSecretKey)
@@ -44,13 +48,11 @@ export class AuthService {
           'La clef secrète que vous avez renseigné est incorrecte.',
         );
 
-      delete dto.secretKey;
-
-      const hash = await argon.hash(dto.password);
+      const hash = await argon.hash(body.password);
 
       const user = await this.prisma.user.create({
         data: {
-          ...dto,
+          ...body,
           password: hash,
         },
       });
@@ -99,7 +101,7 @@ export class AuthService {
     };
 
     const token = this.jwt.sign(payload, {
-      expiresIn: '15m',
+      expiresIn: TOKEN_EXPIRATION,
       secret: this.config.get('JWT_SECRET'),
     });
 
@@ -113,7 +115,7 @@ export class AuthService {
     };
 
     const token = this.jwt.sign(payload, {
-      expiresIn: '30d',
+      expiresIn: REFRESH_TOKEN_EXPIRATION,
       secret: this.config.get('REFRESH_TOKEN_SECRET'),
     });
 
