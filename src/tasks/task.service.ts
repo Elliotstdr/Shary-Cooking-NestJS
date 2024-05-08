@@ -20,7 +20,7 @@ export class TaskService {
       .get(this.config.get('EXTERNAL_TOKEN_URL'))
       .then(async (res) => {
         let explode = res.data.split('access_token":"');
-        explode = explode[0].split('","expires_in');
+        explode = explode[1].split('","expires_in');
 
         const token = explode[0];
 
