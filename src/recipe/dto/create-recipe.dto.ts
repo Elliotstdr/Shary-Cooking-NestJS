@@ -42,7 +42,7 @@ export class CreateRecipeDto {
 
   @IsString()
   @IsOptional()
-  image: string;
+  imageUrl: string;
 
   @IsBoolean()
   @IsOptional()
