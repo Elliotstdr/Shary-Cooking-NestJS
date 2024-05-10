@@ -2,12 +2,13 @@ import * as nodemailer from 'nodemailer';
 import * as handlebars from 'handlebars';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as argon from 'argon2';
+import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
 import { MailResetDto, SendReportDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { BCRYPT_SALT } from 'src/enum';
 
 @Injectable()
 export class MailService {
@@ -42,7 +43,7 @@ export class MailService {
     if (!user) return;
 
     const key = (Math.random() + 1).toString(36).substring(2);
-    const hashedKey = await argon.hash(key);
+    const hashedKey = await bcrypt.hash(key, BCRYPT_SALT);
 
     await this.prisma.user.update({
       where: { email: dto.email },

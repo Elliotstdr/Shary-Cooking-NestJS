@@ -5,10 +5,11 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RefreshTokenDto, SignInDto, SignUpDto } from './dto';
-import * as argon from 'argon2';
+import * as bcrypt from 'bcrypt';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { BCRYPT_SALT } from 'src/enum';
 
 const TOKEN_EXPIRATION = '15m';
 const REFRESH_TOKEN_EXPIRATION = '30d';
@@ -29,7 +30,7 @@ export class AuthService {
     });
     if (!user) throw new ForbiddenException('Credentials incorrect');
 
-    const pwMatches = await argon.verify(user.password, dto.password);
+    const pwMatches = await bcrypt.compare(dto.password, user.password);
     if (!pwMatches) throw new ForbiddenException('Credentials incorrect');
 
     return await this.getTokenPair(user.id, user.email);
@@ -38,9 +39,9 @@ export class AuthService {
   async signup(dto: SignUpDto) {
     const { secretKey, ...body } = dto;
     try {
-      const hashedSecretKey = await argon.verify(
-        process.env.SECRET_KEY,
+      const hashedSecretKey = await bcrypt.compare(
         secretKey,
+        process.env.SECRET_KEY,
       );
 
       if (!hashedSecretKey)
@@ -48,7 +49,7 @@ export class AuthService {
           'La clef secrète que vous avez renseigné est incorrecte.',
         );
 
-      const hash = await argon.hash(body.password);
+      const hash = await bcrypt.hash(body.password, BCRYPT_SALT);
 
       const user = await this.prisma.user.create({
         data: {

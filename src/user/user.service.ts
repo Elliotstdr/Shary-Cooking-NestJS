@@ -2,8 +2,8 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EditPasswordDto, EditUserDto, ResetPasswordDto } from './dto';
-import * as argon from 'argon2';
-import { USER_SELECT } from 'src/enum';
+import * as bcrypt from 'bcrypt';
+import { BCRYPT_SALT, USER_SELECT } from 'src/enum';
 
 @Injectable()
 export class UserService {
@@ -36,11 +36,11 @@ export class UserService {
   async editPassword(userId: number, dto: EditPasswordDto) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
 
-    const pwMatches = await argon.verify(user.password, dto.password);
+    const pwMatches = await bcrypt.compare(dto.oldPassword, user.password);
     if (!pwMatches)
       throw new ForbiddenException("L'ancien mot de passe est invalide");
 
-    const hash = await argon.hash(dto.password);
+    const hash = await bcrypt.hash(dto.password, BCRYPT_SALT);
     await this.prisma.user.update({
       where: { id: userId },
       data: { password: hash },
@@ -56,12 +56,12 @@ export class UserService {
 
     if (!user) return;
 
-    const pwMatches = await argon.verify(user.resetPassword, dto.resetKey);
+    const pwMatches = await bcrypt.compare(dto.resetKey, user.resetPassword);
 
     if (!pwMatches)
       throw new ForbiddenException("La clé secrète n'est pas valide");
 
-    const newPassword = await argon.hash(dto.newPassword);
+    const newPassword = await bcrypt.hash(dto.newPassword, BCRYPT_SALT);
 
     return await this.prisma.user.update({
       where: { email: dto.email },
