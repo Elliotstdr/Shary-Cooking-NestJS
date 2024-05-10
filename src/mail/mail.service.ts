@@ -9,6 +9,7 @@ import { User } from '@prisma/client';
 import { MailResetDto, SendReportDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BCRYPT_SALT } from 'src/enum';
+import { MailPayload } from 'src/image';
 
 @Injectable()
 export class MailService {
@@ -59,7 +60,7 @@ export class MailService {
   async sendReportEmail(
     user: User,
     dto: SendReportDto,
-    file: Express.Multer.File | undefined,
+    file: MailPayload | undefined,
   ) {
     await this.transporter.sendMail({
       subject: 'report from shary-cooking',
@@ -69,9 +70,7 @@ export class MailService {
         title: dto.title,
         message: dto.message,
       }),
-      attachments: file
-        ? [{ filename: file.originalname, content: file.buffer }]
-        : [],
+      attachments: file ? [{ filename: file.image, content: file.buffer }] : [],
     });
   }
 

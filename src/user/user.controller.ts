@@ -13,7 +13,8 @@ import { GetUser } from 'src/auth/decorator';
 import { JwtGuard, NotGuestGuard } from 'src/auth/Guard';
 import { UserService } from './user.service';
 import { EditPasswordDto, EditUserDto, ResetPasswordDto } from './dto';
-import { FILE_INTERCEPTOR, PIPE_BUILDER } from 'src/enum';
+import { SharpPipe } from 'src/image';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users')
 export class UserController {
@@ -27,14 +28,14 @@ export class UserController {
 
   @UseGuards(NotGuestGuard)
   @UseGuards(JwtGuard)
-  @UseInterceptors(FILE_INTERCEPTOR)
+  @UseInterceptors(FileInterceptor('file'))
   @Patch()
   editUser(
     @GetUser('id') userId: number,
     @Body() dto: EditUserDto,
-    @UploadedFile(PIPE_BUILDER) file: Express.Multer.File | undefined,
+    @UploadedFile(new SharpPipe(400)) filePath: string | undefined,
   ) {
-    return this.userService.editUser(userId, dto, file?.filename);
+    return this.userService.editUser(userId, dto, filePath);
   }
 
   @UseGuards(NotGuestGuard)

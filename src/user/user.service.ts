@@ -16,12 +16,12 @@ export class UserService {
   async editUser(
     userId: number,
     dto: EditUserDto,
-    filename: string | undefined,
+    filePath: string | undefined,
   ) {
     const data = { ...dto };
 
-    if (filename) {
-      data.imageUrl = `/public/${filename}`;
+    if (filePath) {
+      data.imageUrl = filePath;
     } else {
       delete data.imageUrl;
     }

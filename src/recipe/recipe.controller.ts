@@ -18,7 +18,8 @@ import { GetUser } from 'src/auth/decorator';
 import { CreateRecipeDto } from './dto';
 import { RecipeService } from './recipe.service';
 import { RecipePropertyGuard } from './Guard';
-import { FILE_INTERCEPTOR, PIPE_BUILDER } from 'src/enum';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { SharpPipe } from 'src/image';
 
 @UseGuards(JwtGuard)
 @Controller('recipes')
@@ -68,13 +69,13 @@ export class RecipeController {
 
   @UseGuards(NotGuestGuard)
   @UseGuards(RecipePropertyGuard)
-  @UseInterceptors(FILE_INTERCEPTOR)
+  @UseInterceptors(FileInterceptor('file'))
   @Post(':id/addPicture')
   addRecipePicture(
     @Param('id', ParseIntPipe) recipeId: number,
-    @UploadedFile(PIPE_BUILDER) file: Express.Multer.File | undefined,
+    @UploadedFile(new SharpPipe()) filePath: string | undefined,
   ) {
-    return this.recipeService.addRecipePicture(recipeId, file?.filename);
+    return this.recipeService.addRecipePicture(recipeId, filePath);
   }
 
   @Post('hellof')

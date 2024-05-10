@@ -11,8 +11,8 @@ import { GetUser } from 'src/auth/decorator';
 import { JwtGuard } from 'src/auth/Guard';
 import { MailResetDto, SendReportDto } from './dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { PIPE_BUILDER } from 'src/enum';
 import { MailService } from './mail.service';
+import { MailPayload, MailSharpPipe } from 'src/image';
 
 @Controller('mail')
 export class MailController {
@@ -29,7 +29,7 @@ export class MailController {
   sendReport(
     @GetUser() user: User,
     @Body() dto: SendReportDto,
-    @UploadedFile(PIPE_BUILDER) file: Express.Multer.File | undefined,
+    @UploadedFile(MailSharpPipe) file: MailPayload | undefined,
   ) {
     return this.mailService.sendReportEmail(user, dto, file);
   }

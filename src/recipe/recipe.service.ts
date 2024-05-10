@@ -140,8 +140,9 @@ export class RecipeService {
     return;
   }
 
-  async addRecipePicture(recipeId: number, filename: string) {
-    const newImageUrl = `/public/${filename}`;
+  async addRecipePicture(recipeId: number, filePath: string | undefined) {
+    if (!filePath) return;
+
     const recipe = await this.prisma.recipe.findUnique({
       where: { id: recipeId },
     });
@@ -151,11 +152,11 @@ export class RecipeService {
     await this.prisma.recipe.update({
       where: { id: recipeId },
       data: {
-        imageUrl: newImageUrl,
+        imageUrl: filePath,
       },
     });
 
-    return newImageUrl;
+    return filePath;
   }
 
   async getTopRecipes() {
