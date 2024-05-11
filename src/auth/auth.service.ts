@@ -3,13 +3,13 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/common/prisma/prisma.service';
 import { RefreshTokenDto, SignInDto, SignUpDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { BCRYPT_SALT } from 'src/enum';
+import { BCRYPT_SALT } from 'src/common/enum';
 
 const TOKEN_EXPIRATION = '15m';
 const REFRESH_TOKEN_EXPIRATION = '30d';

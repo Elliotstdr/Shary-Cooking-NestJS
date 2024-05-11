@@ -12,7 +12,7 @@ import { JwtGuard } from 'src/auth/Guard';
 import { MailResetDto, SendReportDto } from './dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MailService } from './mail.service';
-import { MailPayload, MailSharpPipe } from 'src/image';
+import { MailPayload, TransfertImagePipe } from 'src/common/pipes';
 
 @Controller('mail')
 export class MailController {
@@ -29,7 +29,7 @@ export class MailController {
   sendReport(
     @GetUser() user: User,
     @Body() dto: SendReportDto,
-    @UploadedFile(MailSharpPipe) file: MailPayload | undefined,
+    @UploadedFile(TransfertImagePipe) file: MailPayload | undefined,
   ) {
     return this.mailService.sendReportEmail(user, dto, file);
   }

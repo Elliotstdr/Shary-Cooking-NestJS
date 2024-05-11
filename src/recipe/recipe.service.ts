@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/common/prisma/prisma.service';
 import { CreateRecipeDto } from './dto';
 import { RecipeUtilities } from './recipe.utilities';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { RECIPE_INCLUDE } from 'src/enum';
+import { RECIPE_INCLUDE } from 'src/common/enum';
 import * as fs from 'fs';
 import { join } from 'path';
 

@@ -13,7 +13,7 @@ import { GetUser } from 'src/auth/decorator';
 import { JwtGuard, NotGuestGuard } from 'src/auth/Guard';
 import { UserService } from './user.service';
 import { EditPasswordDto, EditUserDto, ResetPasswordDto } from './dto';
-import { SharpPipe } from 'src/image';
+import { ImagePipe } from 'src/common/pipes';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users')
@@ -33,7 +33,7 @@ export class UserController {
   editUser(
     @GetUser('id') userId: number,
     @Body() dto: EditUserDto,
-    @UploadedFile(new SharpPipe(400)) filePath: string | undefined,
+    @UploadedFile(new ImagePipe(400)) filePath: string | undefined,
   ) {
     return this.userService.editUser(userId, dto, filePath);
   }

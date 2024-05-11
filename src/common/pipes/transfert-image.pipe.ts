@@ -14,7 +14,7 @@ export type MailPayload = {
 };
 
 @Injectable()
-export class MailSharpPipe
+export class TransfertImagePipe
   implements PipeTransform<Express.Multer.File, Promise<MailPayload>>
 {
   async transform(image: Express.Multer.File): Promise<MailPayload> {

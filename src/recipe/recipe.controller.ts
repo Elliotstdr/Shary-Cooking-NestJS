@@ -19,7 +19,7 @@ import { CreateRecipeDto } from './dto';
 import { RecipeService } from './recipe.service';
 import { RecipePropertyGuard } from './Guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { SharpPipe } from 'src/image';
+import { ImagePipe } from 'src/common/pipes';
 
 @UseGuards(JwtGuard)
 @Controller('recipes')
@@ -73,7 +73,7 @@ export class RecipeController {
   @Post(':id/addPicture')
   addRecipePicture(
     @Param('id', ParseIntPipe) recipeId: number,
-    @UploadedFile(new SharpPipe()) filePath: string | undefined,
+    @UploadedFile(new ImagePipe()) filePath: string | undefined,
   ) {
     return this.recipeService.addRecipePicture(recipeId, filePath);
   }

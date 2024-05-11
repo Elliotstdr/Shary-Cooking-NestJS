@@ -7,9 +7,9 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
 import { MailResetDto, SendReportDto } from './dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { BCRYPT_SALT } from 'src/enum';
-import { MailPayload } from 'src/image';
+import { PrismaService } from 'src/common/prisma/prisma.service';
+import { BCRYPT_SALT } from 'src/common/enum';
+import { MailPayload } from 'src/common/pipes';
 
 @Injectable()
 export class MailService {

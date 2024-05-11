@@ -10,7 +10,7 @@ import * as sharp from 'sharp';
 const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 5 * 1024 * 1024;
 
 @Injectable()
-export class SharpPipe
+export class ImagePipe
   implements PipeTransform<Express.Multer.File, Promise<string>>
 {
   constructor(private readonly size = 1000) {}
