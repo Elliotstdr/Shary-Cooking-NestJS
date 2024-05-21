@@ -12,6 +12,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TaskModule } from './common/tasks/task.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { ListModule } from './list/list.module';
+import { DefaultProductModule } from './default-product/default-product.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { join } from 'path';
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/public/',
     }),
+    ListModule,
+    DefaultProductModule,
   ],
 })
 export class AppModule {}

@@ -8,9 +8,9 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
 
   email    String @unique
   password String
@@ -20,8 +20,10 @@ model User {
   imageUrl      String?
   resetPassword String? @db.VarChar(500)
 
-  recipes      Recipe[]
-  savedByUsers SavedByUsers[]
+  recipes         Recipe[]
+  savedByUsers    SavedByUsers[]
+  defaultProducts DefaultProduct[]
+  lists           List[]
 
   @@map("user")
 }
@@ -141,4 +143,32 @@ model ExternalToken {
   value String @db.VarChar(500)
 
   @@map("external_token")
+}
+
+model DefaultProduct {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  name String
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  @@map("default_product")
+}
+
+model List {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  name            String @default("Liste")
+  content         Json
+  selectedRecipes Json
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  @@map("list")
 }

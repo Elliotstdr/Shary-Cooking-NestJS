@@ -21,6 +21,12 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @UseGuards(JwtGuard)
+  @Get()
+  getUsers() {
+    return this.userService.getUsers();
+  }
+
+  @UseGuards(JwtGuard)
   @Get('me')
   getMe(@GetUser() user: User) {
     return this.userService.getMe(user);

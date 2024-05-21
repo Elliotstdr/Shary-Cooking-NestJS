@@ -9,6 +9,16 @@ import { BCRYPT_SALT, USER_SELECT } from 'src/common/enum';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
+  async getUsers() {
+    return await this.prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        imageUrl: true,
+      },
+    });
+  }
+
   async getMe(user: User) {
     return user;
   }
