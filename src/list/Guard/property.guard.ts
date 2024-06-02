@@ -2,8 +2,8 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  NotFoundException,
   UnauthorizedException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 
@@ -19,7 +19,9 @@ export class ListPropertyGuard implements CanActivate {
     });
 
     if (!list) {
-      throw new NotFoundException('Aucune liste trouvée pour cet id');
+      throw new UnprocessableEntityException(
+        'Aucune liste trouvée pour cet id',
+      );
     }
 
     if (list.userId !== req.user.id) {

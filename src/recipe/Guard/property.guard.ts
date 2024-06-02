@@ -2,8 +2,8 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  NotFoundException,
   UnauthorizedException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 
@@ -19,7 +19,9 @@ export class RecipePropertyGuard implements CanActivate {
     });
 
     if (!recipe) {
-      throw new NotFoundException('Aucune recette trouvée pour cet id');
+      throw new UnprocessableEntityException(
+        'Aucune recette trouvée pour cet id',
+      );
     }
 
     if (recipe.userId !== req.user.id) {

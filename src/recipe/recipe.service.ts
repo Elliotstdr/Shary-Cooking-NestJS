@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { CreateRecipeDto } from './dto';
 import { RecipeUtilities } from './recipe.utilities';
@@ -96,7 +102,7 @@ export class RecipeService {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        if (res.data.count === 0) return;
+        if (res.data.count === 0) throw new HttpException('No data found', 400);
 
         res.data.items.forEach((x: any) =>
           response.push({
@@ -115,7 +121,7 @@ export class RecipeService {
         return response;
       })
       .catch(() => {
-        return;
+        throw new InternalServerErrorException('An exception occured');
       });
 
     return response;
@@ -141,7 +147,7 @@ export class RecipeService {
   }
 
   async addRecipePicture(recipeId: number, filePath: string | undefined) {
-    if (!filePath) return;
+    if (!filePath) throw new UnprocessableEntityException('No file found');
 
     const recipe = await this.prisma.recipe.findUnique({
       where: { id: recipeId },

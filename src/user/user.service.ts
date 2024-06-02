@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { EditPasswordDto, EditUserDto, ResetPasswordDto } from './dto';
@@ -64,7 +68,7 @@ export class UserService {
       where: { email: dto.email },
     });
 
-    if (!user) return;
+    if (!user) throw new BadRequestException('An exception occured');
 
     const pwMatches = await bcrypt.compare(dto.resetKey, user.resetPassword);
 

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { CreateListDto, EditListDto } from './dto';
 
@@ -22,7 +22,9 @@ export class ListService {
   async shareList(listId: number, userId: number) {
     const list = await this.prisma.list.findUnique({ where: { id: listId } });
 
-    if (!list) throw new NotFoundException('La liste est introuvable');
+    if (!list) {
+      throw new UnprocessableEntityException('La liste est introuvable');
+    }
 
     await this.prisma.list.create({
       data: {

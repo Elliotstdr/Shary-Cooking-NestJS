@@ -3,7 +3,7 @@ import * as handlebars from 'handlebars';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as bcrypt from 'bcrypt';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
 import { MailResetDto, SendReportDto } from './dto';
@@ -41,7 +41,7 @@ export class MailService {
       where: { email: dto.email },
     });
 
-    if (!user) return;
+    if (!user) throw new BadRequestException('An exception occured');
 
     const key = (Math.random() + 1).toString(36).substring(2);
     const hashedKey = await bcrypt.hash(key, BCRYPT_SALT);

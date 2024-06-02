@@ -2,8 +2,8 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  NotFoundException,
   UnauthorizedException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 
@@ -19,7 +19,9 @@ export class DefaultProductPropertyGuard implements CanActivate {
     });
 
     if (!defaultProduct) {
-      throw new NotFoundException('Aucune produit trouvé pour cet id');
+      throw new UnprocessableEntityException(
+        'Aucune produit trouvé pour cet id',
+      );
     }
 
     if (defaultProduct.userId !== req.user.id) {
