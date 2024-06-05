@@ -97,8 +97,8 @@ export class AuthService {
       .cookie(REFRESH_TOKEN, refreshToken, {
         httpOnly: true,
         secure: this.config.get('NODE_ENV') === 'production',
-        sameSite: 'lax',
-        expires: new Date(Date.now() + 32 * 24 * 60 * 60 * 1000),
+        sameSite: this.config.get('NODE_ENV') === 'production' ? 'none' : 'lax',
+        maxAge: 32 * 24 * 60 * 60 * 1000,
       })
       .send({ access_token: token });
   }
