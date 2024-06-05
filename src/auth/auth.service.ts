@@ -96,8 +96,8 @@ export class AuthService {
     return res
       .cookie(REFRESH_TOKEN, refreshToken, {
         httpOnly: true,
-        secure: this.config.get('NODE_ENV') === 'production',
-        sameSite: this.config.get('NODE_ENV') === 'production' ? 'none' : 'lax',
+        secure: true,
+        sameSite: 'strict',
         maxAge: 32 * 24 * 60 * 60 * 1000,
       })
       .send({ access_token: token });
