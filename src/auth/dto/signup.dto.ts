@@ -9,9 +9,9 @@ export class SignUpDto {
   @IsNotEmpty()
   password: string;
 
-  @IsString()
-  @IsNotEmpty()
-  secretKey: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // secretKey: string;
 
   @IsString()
   @IsNotEmpty()

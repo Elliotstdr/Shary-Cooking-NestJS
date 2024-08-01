@@ -39,17 +39,17 @@ export class AuthService {
   }
 
   async signup(dto: SignUpDto, res: Response) {
-    const { secretKey, ...body } = dto;
+    const { ...body } = dto;
     try {
-      const hashedSecretKey = await bcrypt.compare(
-        secretKey,
-        process.env.SECRET_KEY,
-      );
+      // const hashedSecretKey = await bcrypt.compare(
+      //   secretKey,
+      //   process.env.SECRET_KEY,
+      // );
 
-      if (!hashedSecretKey)
-        throw new ForbiddenException(
-          'La clef secrète que vous avez renseigné est incorrecte.',
-        );
+      // if (!hashedSecretKey)
+      //   throw new ForbiddenException(
+      //     'La clef secrète que vous avez renseigné est incorrecte.',
+      //   );
 
       const hash = await bcrypt.hash(body.password, BCRYPT_SALT);
 
